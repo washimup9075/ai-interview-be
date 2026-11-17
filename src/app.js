@@ -10,20 +10,19 @@ import paymentRoutes from './routes/payment.route.js'
 import cookieParser from 'cookie-parser';
 
 
-const app=express();
-app.use(express.json())
+const app = express();
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:5175",
-];
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:5174,http://localhost:5175")
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. curl, Postman) or matching origins
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
