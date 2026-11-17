@@ -3,6 +3,11 @@ import app from './src/app.js';
 import connectToDB from './src/db/db.js';
 
 const startServer = async () => {
+  if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET is required to start the backend.');
+    process.exit(1);
+  }
+
   const isConnected = await connectToDB();
 
   if (!isConnected) {

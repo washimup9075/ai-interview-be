@@ -1,5 +1,4 @@
-import cookie from "cookie-parser";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 const generateToken = (userId, res) => {
     const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -7,7 +6,7 @@ const generateToken = (userId, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        secure: process.env.NODE_ENV === "production"
+        secure: process.env.NODE_ENV === "production",
     });
     return token;
 };
