@@ -1,12 +1,21 @@
+import mongoose from "mongoose";
 import userModel from "../models/user.model.js"
 import bycrpt from "bcryptjs"
 import generateToken from "../utils/utils.js";
 import jwt from "jsonwebtoken"
 
+const ensureDbReady = () => {
+    if (mongoose.connection.readyState !== 1) {
+        throw new Error("Database is unavailable. Please try again later.");
+    }
+};
+
 {/* Signup controller*/}
 export const signup=async(req,res)=>{
     const {fullname,email,password}=req.body;
     try {
+        ensureDbReady();
+
         if(!fullname||!email||!password){
             return res.status(400).json({message:"All fields are required"})
         }
@@ -56,6 +65,7 @@ export const login=async (req,res)=>{
     
     const {email,password}=req.body;
     try {
+        ensureDbReady();
         const user=await userModel.findOne({email})
         if(!user){
             return res.status(400).json({ message: "Invalid Credentials" });
@@ -72,7 +82,8 @@ export const login=async (req,res)=>{
         })
     } catch (error) {
         console.error("Error in login controller:", error.message || error);
-        return res.status(500).json({ message: error.message || "Internal Server Error" })
+        const statusCode = error.message?.includes("Database is unavailable") ? 503 : 500;
+        return res.status(statusCode).json({ message: error.message || "Internal Server Error" })
     }
 }
 
