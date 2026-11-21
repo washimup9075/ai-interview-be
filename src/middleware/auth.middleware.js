@@ -18,13 +18,24 @@ async function authMiddleware(req,res,next) {
 
     let decode;
     try {
-        decode=jwt.verify(token,process.env.JWT_SECRET);
-        if (!decode?.userId) {
-            return res.status(401).json({ message: "Invalid token, please login again" });
-        }
+        decode = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
-        console.log("Invalid or expired JWT:", error.message);
-        return res.status(401).json({ message: "Invalid or expired token, please login again" });
+        const cookieToken = req.cookies?.token;
+        if (cookieToken && cookieToken !== token) {
+            try {
+                decode = jwt.verify(cookieToken, process.env.JWT_SECRET);
+            } catch (cookieError) {
+                console.log("Invalid or expired JWT:", cookieError.message);
+                return res.status(401).json({ message: "Invalid or expired token, please login again" });
+            }
+        } else {
+            console.log("Invalid or expired JWT:", error.message);
+            return res.status(401).json({ message: "Invalid or expired token, please login again" });
+        }
+    }
+
+    if (!decode?.userId) {
+        return res.status(401).json({ message: "Invalid token, please login again" });
     }
 
     try {
